@@ -1,0 +1,46 @@
+{
+  "name": "@mizara/sdk",
+  "version": "0.1.0",
+  "description": "Mizara — programmable authorization layer for AI actions",
+  "license": "Apache-2.0",
+  "keywords": [
+    "ai-agents",
+    "authorization",
+    "policy-engine",
+    "access-control",
+    "llm",
+    "agent-security"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getmizara/mizara-core.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mizara": "dist/cli/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "tsc",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src test demo",
+    "demo:simulate": "tsx demo/simulate.ts"
+  },
+  "dependencies": {
+    "jsep": "^1.3.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^2.1.0"
+  }
+}
