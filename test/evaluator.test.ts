@@ -34,6 +34,30 @@ describe('evaluateCondition', () => {
     ).toBe(true);
   });
 
+  it('evaluates addition', () => {
+    expect(evaluateCondition('resource.attributes.amount + 5 > 79', baseInput)).toBe(true);
+    expect(evaluateCondition('resource.attributes.amount + 5 > 81', baseInput)).toBe(false);
+  });
+
+  it('evaluates subtraction', () => {
+    expect(evaluateCondition('resource.attributes.amount - 25 == 50', baseInput)).toBe(true);
+  });
+
+  it('evaluates compound arithmetic with comparison', () => {
+    // Cumulative session pattern: caller passes projected total in context
+    // 300 + 75 = 375 <= 500 → true (under limit, allow)
+    expect(evaluateCondition('context.session_total + resource.attributes.amount <= 500', {
+      ...baseInput,
+      context: { session_total: 300, target_jurisdiction: 'EU', data_classification: ['PII', 'PCI'] },
+    })).toBe(true);
+
+    // 350 + 75 = 425 > 400 → false (over limit, deny)
+    expect(evaluateCondition('context.session_total + resource.attributes.amount <= 400', {
+      ...baseInput,
+      context: { session_total: 350, target_jurisdiction: 'EU', data_classification: ['PII', 'PCI'] },
+    })).toBe(false);
+  });
+
   it('throws on unsupported expressions instead of silently failing', () => {
     expect(() => evaluateCondition('resource.attributes.amount ** 2', baseInput)).toThrow();
   });

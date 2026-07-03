@@ -2,10 +2,7 @@ import jsep from 'jsep';
 import type { AuthorizeInput } from '../types';
 
 // Policy conditions are parsed with jsep (AST only, no eval/Function) and
-// evaluated against a restricted, read-only scope. This intentionally
-// supports only what V1 policies need: dot-path access, comparisons,
-// boolean logic, and `.contains()` on arrays/strings. Cedar replaces this
-// evaluator in Phase 3 without changing the condition string format.
+// evaluated against a restricted, read-only scope.
 
 type Scope = Record<string, unknown>;
 
@@ -84,18 +81,16 @@ function evaluateNode(node: jsep.Expression, scope: Scope): unknown {
 
 function applyBinaryOperator(operator: string, left: unknown, right: unknown): unknown {
   switch (operator) {
-    case '==':
-      return left === right;
-    case '!=':
-      return left !== right;
-    case '<=':
-      return (left as number) <= (right as number);
-    case '>=':
-      return (left as number) >= (right as number);
-    case '<':
-      return (left as number) < (right as number);
-    case '>':
-      return (left as number) > (right as number);
+    case '==':  return left === right;
+    case '!=':  return left !== right;
+    case '<=':  return (left as number) <= (right as number);
+    case '>=':  return (left as number) >= (right as number);
+    case '<':   return (left as number) <  (right as number);
+    case '>':   return (left as number) >  (right as number);
+    case '+':   return (left as number) +  (right as number);
+    case '-':   return (left as number) -  (right as number);
+    case '*':   return (left as number) *  (right as number);
+    case '/':   return (left as number) /  (right as number);
     default:
       throw new Error(`Unsupported operator in policy condition: ${operator}`);
   }
