@@ -1,0 +1,14 @@
+{
+  "policy_id": "pol_support_agent_v1",
+  "client_id": "demo_customer",
+  "rules": [
+    {
+      "id": "rule_max_refund_limit",
+      "target_action": "execute_refund",
+      "condition": "resource.attributes.amount <= 50.00",
+      "effect": "ALLOW",
+      "fallback_effect": "DENY",
+      "remediation_message": "Refund amount exceeds the $50 unapproved threshold. Escalate to a human agent."
+    }
+  ]
+}
