@@ -73,13 +73,12 @@ change thresholds without a deploy.
 
 **No Cedar/Rego syntax required.** Conditions are plain boolean expressions:
 `resource.attributes.amount <= 50.00`, `context.jurisdiction == 'EU'`,
-`context.data_classification.contains('PII')`. The evaluator is a safe
-AST-only engine (jsep), never `eval`.
+`context.data_classification.contains('PII')`.
 
 **Receipts on every decision.** Even `ALLOW` decisions generate a signed
 receipt. The audit trail is the product, not an afterthought.
 
-## Quick start (local demo)
+## Try it locally
 
 ```bash
 git clone https://github.com/getmizara/mizara-core
@@ -90,19 +89,11 @@ npm run demo:simulate
 
 ## Hosted API
 
-If you'd rather call an endpoint than run locally:
-
 ```bash
 POST https://mizara-services.vercel.app/api/v1/authorize
 Authorization: Bearer <api_key>
 Content-Type: application/json
 ```
-
-## Status
-
-v0.1.0 — early. Looking for 2-3 people running agents against real systems
-to try this and tell us where the schema doesn't fit their setup.
-Open an issue or email the maintainer.
 
 ## License
 

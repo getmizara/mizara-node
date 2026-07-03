@@ -1,6 +1,6 @@
 {
   "name": "@mizara/sdk",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Mizara — programmable authorization layer for AI actions",
   "license": "Apache-2.0",
   "keywords": [
@@ -21,7 +21,15 @@
     "mizara": "dist/cli/index.js"
   },
   "files": [
-    "dist"
+    "dist/cli",
+    "dist/engine",
+    "dist/receipts",
+    "dist/sdk",
+    "dist/types",
+    "dist/index.js",
+    "dist/index.js.map",
+    "dist/index.d.ts",
+    "dist/index.d.ts.map"
   ],
   "scripts": {
     "prepare": "tsc",

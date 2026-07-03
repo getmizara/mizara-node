@@ -13,5 +13,5 @@
     "rootDir": "src"
   },
   "include": ["src"],
-  "exclude": ["dist", "node_modules", "test", "demo"]
+  "exclude": ["dist", "node_modules", "test", "demo", "src/mcp", "examples"]
 }
