@@ -84,12 +84,12 @@ server.tool(
 
     const headline =
       result.status === 'ALLOW'
-        ? `ALLOW — action may proceed`
+        ? `ALLOW  -  action may proceed`
         : result.status === 'DENY'
-          ? `DENY — ${result.enforcement.user_facing_error ?? 'blocked by policy'}`
+          ? `DENY  -  ${result.enforcement.user_facing_error ?? 'blocked by policy'}`
           : result.status === 'REDACT'
-            ? `REDACT — data must be masked before proceeding`
-            : `RE_ROUTE — action requires alternative handling`;
+            ? `REDACT  -  data must be masked before proceeding`
+            : `RE_ROUTE  -  action requires alternative handling`;
 
     return {
       content: [

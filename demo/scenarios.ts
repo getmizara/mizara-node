@@ -8,7 +8,7 @@ export interface DemoScenario {
 
 export const scenarios: DemoScenario[] = [
   {
-    name: 'Scenario A — Refund $25.00',
+    name: 'Scenario A  -  Refund $25.00',
     expected: 'ALLOW',
     input: {
       actor: { id: 'agent_support_eu_v4', type: 'autonomous_agent', framework: 'langgraph' },
@@ -22,7 +22,7 @@ export const scenarios: DemoScenario[] = [
     },
   },
   {
-    name: 'Scenario B — Refund $75.00',
+    name: 'Scenario B  -  Refund $75.00',
     expected: 'DENY',
     input: {
       actor: { id: 'agent_support_eu_v4', type: 'autonomous_agent', framework: 'langgraph' },
@@ -36,7 +36,7 @@ export const scenarios: DemoScenario[] = [
     },
   },
   {
-    name: 'Scenario C — Transmit raw health metrics to unauthorized endpoint',
+    name: 'Scenario C  -  Transmit raw health metrics to unauthorized endpoint',
     expected: 'REDACT',
     input: {
       actor: { id: 'agent_support_eu_v4', type: 'autonomous_agent', framework: 'langgraph' },

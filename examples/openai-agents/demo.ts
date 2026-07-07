@@ -9,16 +9,16 @@ if (!process.env.OPENAI_API_KEY) {
 
 const scenarios = [
   {
-    name: 'Scenario A — Refund $25 (under threshold)',
+    name: 'Scenario A  -  Refund $25 (under threshold)',
     message: 'Please refund $25 for order ORD-9921, customer received wrong item.',
   },
   {
-    name: 'Scenario B — Refund $75 (over threshold)',
+    name: 'Scenario B  -  Refund $75 (over threshold)',
     message: 'Please refund $75 for order ORD-9922, customer wants full refund.',
   },
 ];
 
-console.log('Mizara + OpenAI Agents SDK (TypeScript) — Authorization Gate Demo\n');
+console.log('Mizara + OpenAI Agents SDK (TypeScript)  -  Authorization Gate Demo\n');
 
 for (const s of scenarios) {
   console.log(`─── ${s.name}`);

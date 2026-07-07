@@ -13,19 +13,19 @@ import { graph } from './agent';
 
 const scenarios = [
   {
-    name: 'Scenario A — Refund $25 (under threshold)',
+    name: 'Scenario A  -  Refund $25 (under threshold)',
     expected: 'ALLOW',
     message: 'Please refund $25 for order 99210, the customer received the wrong item.',
   },
   {
-    name: 'Scenario B — Refund $75 (over threshold)',
+    name: 'Scenario B  -  Refund $75 (over threshold)',
     expected: 'DENY',
     message: 'Please refund $75 for order 99210, the customer is requesting a full refund.',
   },
 ];
 
 async function run() {
-  console.log('Mizara + LangGraph — Authorization Gate Demo\n');
+  console.log('Mizara + LangGraph  -  Authorization Gate Demo\n');
 
   for (const scenario of scenarios) {
     console.log(`─── ${scenario.name} ───────────────────────────────`);

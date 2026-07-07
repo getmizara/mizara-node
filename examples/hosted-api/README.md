@@ -1,6 +1,6 @@
 # Using the Mizara Hosted API
 
-The fastest way to start — no local policy file needed. Sign up at mizara.ai/signup,
+The fastest way to start  -  no local policy file needed. Sign up at mizara.ai/signup,
 get your API key, and call the hosted endpoint directly.
 
 ## 1. Get an API key

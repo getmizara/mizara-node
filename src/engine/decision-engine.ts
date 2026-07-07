@@ -7,7 +7,7 @@ export interface RuleMatch {
 }
 
 // V1 resolution: the first rule (in array order) whose target_action matches
-// ("any" or an exact action.name match) determines the result — its condition
+// ("any" or an exact action.name match) determines the result  -  its condition
 // decides between `effect` and `fallback_effect`. Multi-rule precedence
 // (e.g. most-restrictive-wins across several matching rules) is deferred
 // until design partner policies actually need it.

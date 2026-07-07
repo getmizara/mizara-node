@@ -1,7 +1,7 @@
 # Mizara + LangGraph
 
 Shows how to add `mizara.authorize()` as a node in a LangGraph agent so
-authorization runs **before tool execution** — structurally, not as advisory
+authorization runs **before tool execution**  -  structurally, not as advisory
 application code that can be forgotten or bypassed.
 
 ## The pattern
@@ -14,7 +14,7 @@ START → agent → authorize → [ALLOW]  → tools → agent → END
 
 The `authorize` node sits between the agent and tool execution. The tool
 **cannot run** without passing through it. The authorization result is stored
-in graph state and determines routing — not application logic.
+in graph state and determines routing  -  not application logic.
 
 ## Run it
 
@@ -29,17 +29,17 @@ immediately with just the policy file.
 **Expected output:**
 
 ```
-─── Scenario A — Refund $25 (under threshold) ─────
+─── Scenario A  -  Refund $25 (under threshold) ─────
 Input: "Please refund $25 for order 99210..."
 
 Final agent response:
 Refund processed successfully. {"success":true,"refund_id":"ref_...","amount":25}
 
-─── Scenario B — Refund $75 (over threshold) ──────
+─── Scenario B  -  Refund $75 (over threshold) ──────
 Input: "Please refund $75 for order 99210..."
 
 Final agent response:
-[mizara] Action blocked — status: DENY
+[mizara] Action blocked  -  status: DENY
 Tool: execute_refund
 Rule: rule_max_refund_limit
 Reason: Refund exceeds the $50 unapproved threshold. Escalate to a human agent.
@@ -61,7 +61,7 @@ function agentNode(state: State) {
 }
 ```
 
-The rest of the graph — including the authorization node — stays identical.
+The rest of the graph  -  including the authorization node  -  stays identical.
 
 ## Connecting to the Mizara hosted API
 
@@ -80,5 +80,5 @@ const mizara = createMizaraClient({ policyPath: './policy.json' });
 
 A check the agent is "supposed to call" is exactly as skippable as a system
 prompt the agent is "supposed to follow." When the authorization gate is a
-dedicated graph node, it is part of the execution path — not optional
+dedicated graph node, it is part of the execution path  -  not optional
 application code.

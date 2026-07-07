@@ -7,7 +7,7 @@ async function main() {
     policyPath: path.join(__dirname, 'policies', 'demo-policy.json'),
   });
 
-  console.log('Mizara — Local Authorization Demo\n');
+  console.log('Mizara  -  Local Authorization Demo\n');
 
   let allPassed = true;
 

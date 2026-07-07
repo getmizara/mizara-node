@@ -2,7 +2,7 @@ import { createHash, createHmac, randomBytes } from 'node:crypto';
 import type { AuthorizationStatus, AuthorizeInput, CryptographicReceipt } from '../types';
 
 // V1 signs receipts with a local HMAC secret as a stand-in. Phase 3 replaces
-// this with KMS-backed asymmetric signing once the hosted runtime exists —
+// this with KMS-backed asymmetric signing once the hosted runtime exists  - 
 // the receipt shape (id, hash, signature) does not change.
 const LOCAL_SIGNING_SECRET = process.env.MIZARA_LOCAL_SIGNING_SECRET ?? 'mizara-local-dev-secret';
 

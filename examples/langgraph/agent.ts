@@ -12,7 +12,7 @@
  *                             → [DENY]   → blocked        → END
  *                             → [REDACT] → blocked        → END
  *
- * No LLM API key required — the agent node is simulated for the demo.
+ * No LLM API key required  -  the agent node is simulated for the demo.
  * To use a real LLM, replace the agentNode function with an LLM call.
  */
 
@@ -98,7 +98,7 @@ function agentNode(state: State): Partial<State> {
  * Authorization node: the structural enforcement gate.
  *
  * mizara.authorize() evaluates the pending tool call against the active
- * policy before anything executes. The result determines routing —
+ * policy before anything executes. The result determines routing  - 
  * the tool cannot run without passing through this node.
  */
 async function authorizationNode(state: State): Promise<Partial<State>> {
@@ -131,7 +131,7 @@ async function authorizationNode(state: State): Promise<Partial<State>> {
 }
 
 /**
- * Tool execution node — only reached when authorization returned ALLOW.
+ * Tool execution node  -  only reached when authorization returned ALLOW.
  * Replace the simulation here with your real tool call (Stripe, internal API, etc.)
  */
 async function toolsNode(state: State): Promise<Partial<State>> {
@@ -164,7 +164,7 @@ async function toolsNode(state: State): Promise<Partial<State>> {
 }
 
 /**
- * Blocked node — reached when authorization returned DENY, REDACT, or RE_ROUTE.
+ * Blocked node  -  reached when authorization returned DENY, REDACT, or RE_ROUTE.
  * Surfaces the policy message and the signed receipt for audit.
  */
 function blockedNode(state: State): Partial<State> {
@@ -176,7 +176,7 @@ function blockedNode(state: State): Partial<State> {
     messages: [
       new AIMessage({
         content: [
-          `[mizara] Action blocked — status: ${auth.status}`,
+          `[mizara] Action blocked  -  status: ${auth.status}`,
           `Tool: ${toolCall?.name ?? 'unknown'}`,
           `Rule: ${auth.evaluation_metadata.triggered_rule_id ?? 'none'}`,
           `Reason: ${auth.enforcement.user_facing_error ?? ''}`,

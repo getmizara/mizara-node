@@ -1,5 +1,5 @@
 // Manual type declarations for @modelcontextprotocol/sdk.
-// Minimal surface area — only what the MCP server file needs.
+// Minimal surface area  -  only what the MCP server file needs.
 
 declare module '@modelcontextprotocol/sdk/server/mcp.js' {
   export class McpServer {
