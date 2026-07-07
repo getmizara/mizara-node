@@ -1,6 +1,6 @@
 {
   "name": "@mizara/sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Mizara — programmable authorization layer for AI actions",
   "license": "Apache-2.0",
   "keywords": [
