@@ -6,11 +6,9 @@ export interface RuleMatch {
   status: AuthorizationStatus;
 }
 
-// V1 resolution: the first rule (in array order) whose target_action matches
-// ("any" or an exact action.name match) determines the result  -  its condition
-// decides between `effect` and `fallback_effect`. Multi-rule precedence
-// (e.g. most-restrictive-wins across several matching rules) is deferred
-// until design partner policies actually need it.
+// Resolves to the first rule (in array order) whose target_action matches
+// ("any" or an exact action.name match). Only one rule is evaluated per
+// action name; its condition decides between `effect` and `fallback_effect`.
 export function resolveRule(input: AuthorizeInput, policy: Policy): RuleMatch | null {
   for (const rule of policy.rules) {
     const matchesAction = rule.target_action === 'any' || rule.target_action === input.action.name;

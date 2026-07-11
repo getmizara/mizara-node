@@ -37,11 +37,11 @@ server.tool(
     resource_type: z.string().describe('Type of resource being acted on (e.g. monetary_transaction, health_record)'),
     resource_id: z.string().describe('Unique ID of the specific resource'),
     resource_attributes: z
-      .record(z.unknown())
+      .record(z.string(), z.unknown())
       .optional()
       .describe('Resource attributes relevant to policy (e.g. {"amount": 75, "currency": "USD"})'),
     context: z
-      .record(z.unknown())
+      .record(z.string(), z.unknown())
       .optional()
       .describe('Runtime context for policy evaluation (e.g. {"client_id": "acme", "target_jurisdiction": "EU"})'),
   },

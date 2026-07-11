@@ -79,7 +79,7 @@ Plain JSON. No Rego, no Cedar syntax.
 
 Condition expressions support comparisons, boolean logic, arithmetic, and `.contains()`:
 
-```
+```text
 resource.attributes.amount <= 50.00
 context.jurisdiction == 'EU' && context.data_classification.contains('PII')
 context.session_total + resource.attributes.amount <= 500
@@ -88,10 +88,34 @@ context.session_total + resource.attributes.amount <= 500
 ## Integrations
 
 | Framework | Example |
-|---|---|
+| --- | --- |
 | LangGraph | [`examples/langgraph/`](examples/langgraph/) |
 | OpenAI Agents SDK | [`examples/openai-agents/`](examples/openai-agents/) |
 | Hosted API | [`examples/hosted-api/`](examples/hosted-api/) |
+| MCP (Claude Desktop, Claude Code) | see below |
+
+## MCP server
+
+`@mizara/sdk` ships an MCP server that exposes `authorize()` as a tool — `mizara_authorize` — to any MCP-compatible agent.
+
+```bash
+npm install -g @mizara/sdk
+```
+
+Add to your MCP client config (e.g. Claude Desktop's `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "mizara": {
+      "command": "mizara-mcp",
+      "args": ["--policy", "/absolute/path/to/your/policy.json"]
+    }
+  }
+}
+```
+
+Restart the client. The agent now has `mizara_authorize` in its tool list and gets a signed receipt back with every call.
 
 ## Design choices
 
