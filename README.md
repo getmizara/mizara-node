@@ -56,6 +56,19 @@ const result = await mizara.authorize({
 });
 ```
 
+Hosted mode evaluates locally against a policy snapshot that's refreshed in the background (every 10s by default). A Mizara outage doesn't fail every `authorize()` call, it keeps using the last policy successfully fetched. Receipts are generated locally and flushed to the hosted API asynchronously. For zero-loss delivery across a process crash, pass `receiptLogPath`:
+
+```ts
+const mizara = createMizaraClient({
+  apiKey:   process.env.MIZARA_API_KEY!,
+  clientId: 'acme_corp',
+  receiptLogPath: './mizara-receipts.log',
+  onSyncError: (err) => console.error('[mizara] policy sync failing:', err.message),
+});
+```
+
+Call `mizara.close()` before your process exits to stop the background sync and flush timers (a no-op in local mode, safe to always call).
+
 ## Policy format
 
 Plain JSON. No Rego, no Cedar syntax.
@@ -122,6 +135,8 @@ Restart the client. The agent now has `mizara_authorize` in its tool list and ge
 **Fail closed.** No matching rule returns `DENY`, not `ALLOW`.
 
 **Most restrictive wins.** When more than one rule matches an action, the most restrictive triggered outcome wins - `DENY` > `RE_ROUTE` > `REDACT` > `ALLOW` - regardless of rule order.
+
+**Resilient by default, with one honest exception.** Hosted mode evaluates locally against a synced policy, so a Mizara outage doesn't stop your agent. A rule that uses `context.session_total` is the one case that can't get this guarantee: cumulative tracking is inherently centralized state, so if the session store is unreachable, that specific request fails closed rather than silently trusting a stale total.
 
 **Policy as data.** Rules live in a JSON file that non-engineers can edit without a deploy.
 

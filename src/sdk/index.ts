@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolveRule } from '../engine/decision-engine';
 import { createReceipt } from '../receipts/receipt';
 import type { AuthorizeInput, AuthorizeResult, Policy } from '../types';
+import { createResilientHostedClient } from './resilient-client';
 
 const HOSTED_URL = 'https://mizara-services.vercel.app';
 
@@ -13,10 +14,22 @@ export interface MizaraClientOptions {
   apiKey?: string;
   clientId?: string;
   baseUrl?: string;
+  // Hosted mode only: background policy sync interval (default 10000ms)
+  syncIntervalMs?: number;
+  // Hosted mode only: called after 3 consecutive failed policy syncs
+  onSyncError?: (err: Error) => void;
+  // Hosted mode only: path to a local file backing the receipt delivery
+  // queue, so a process crash between a decision and its async flush to
+  // the hosted API doesn't lose the receipt. Omit to run in-memory only.
+  receiptLogPath?: string;
 }
 
 export interface MizaraClient {
   authorize(input: AuthorizeInput): Promise<AuthorizeResult>;
+  // Stops any background sync/flush timers. Safe to call on any client;
+  // a no-op in local mode. Call before process exit so nothing keeps a
+  // short-lived process (a script, a test run) alive.
+  close(): void;
 }
 
 export function createMizaraClient(options: MizaraClientOptions): MizaraClient {
@@ -24,7 +37,14 @@ export function createMizaraClient(options: MizaraClientOptions): MizaraClient {
     if (!options.clientId) {
       throw new Error('createMizaraClient with apiKey requires clientId');
     }
-    return createHostedClient(options.apiKey, options.clientId, options.baseUrl);
+    return createResilientHostedClient({
+      apiKey: options.apiKey,
+      clientId: options.clientId,
+      baseUrl: options.baseUrl ?? HOSTED_URL,
+      syncIntervalMs: options.syncIntervalMs,
+      onSyncError: options.onSyncError,
+      receiptLogPath: options.receiptLogPath,
+    });
   }
 
   const policy = options.policy ?? loadPolicyFromFile(options.policyPath);
@@ -54,35 +74,8 @@ function createLocalClient(policy: Policy): MizaraClient {
         cryptographic_receipt: receipt,
       };
     },
-  };
-}
-
-function createHostedClient(apiKey: string, clientId: string, baseUrl?: string): MizaraClient {
-  const endpoint = `${baseUrl ?? HOSTED_URL}/api/v1/authorize`;
-
-  return {
-    async authorize(input: AuthorizeInput): Promise<AuthorizeResult> {
-      // Auto-populate context.client_id so callers don't need to set it manually
-      const enriched: AuthorizeInput = {
-        ...input,
-        context: { client_id: clientId, ...input.context },
-      };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(enriched),
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({})) as { error?: string };
-        throw new Error(`Mizara API error ${response.status}: ${err.error ?? response.statusText}`);
-      }
-
-      return response.json() as Promise<AuthorizeResult>;
+    close(): void {
+      // No background work to stop in local mode.
     },
   };
 }
