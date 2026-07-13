@@ -96,7 +96,7 @@ context.session_total + resource.attributes.amount <= 500
 
 ## MCP server
 
-`@mizara/sdk` ships an MCP server that exposes `authorize()` as a tool — `mizara_authorize` — to any MCP-compatible agent.
+`@mizara/sdk` ships an MCP server that exposes `authorize()` as a tool - `mizara_authorize` - to any MCP-compatible agent.
 
 ```bash
 npm install -g @mizara/sdk
@@ -120,6 +120,8 @@ Restart the client. The agent now has `mizara_authorize` in its tool list and ge
 ## Design choices
 
 **Fail closed.** No matching rule returns `DENY`, not `ALLOW`.
+
+**Most restrictive wins.** When more than one rule matches an action, the most restrictive triggered outcome wins - `DENY` > `RE_ROUTE` > `REDACT` > `ALLOW` - regardless of rule order.
 
 **Policy as data.** Rules live in a JSON file that non-engineers can edit without a deploy.
 

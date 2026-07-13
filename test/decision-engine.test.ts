@@ -79,3 +79,98 @@ describe('decision engine', () => {
     expect(result1.cryptographic_receipt.signature).toMatch(/^sig_local_/);
   });
 });
+
+describe('multi-rule composition (most restrictive wins)', () => {
+  // The exact example policy from the V1 MVP spec: a payout-limit rule
+  // targeting execute_payout, and a regional data-isolation rule
+  // targeting "any". Both can match the same execute_payout request.
+  const multiRulePolicy: Policy = {
+    policy_id: 'pol_payout_v1',
+    client_id: 'acme_corp',
+    rules: [
+      {
+        id: 'rule_max_payout_limit',
+        target_action: 'execute_payout',
+        condition: 'resource.attributes.amount <= 50.00',
+        effect: 'ALLOW',
+        fallback_effect: 'DENY',
+        remediation_message: 'Transaction value exceeds maximum unapproved client threshold of $50.00.',
+      },
+      {
+        id: 'rule_regional_data_isolation',
+        target_action: 'any',
+        condition: "context.target_jurisdiction == 'EU' && context.data_classification.contains('PII')",
+        effect: 'ALLOW',
+        fallback_effect: 'REDACT',
+        remediation_message: 'Sensitive European personal profiles must be dynamically masked before transport.',
+      },
+    ],
+  };
+
+  it('combines both matching rules instead of only firing the first one', async () => {
+    const mizara = createMizaraClient({ policy: multiRulePolicy });
+
+    // Within the $50 limit (rule 1 alone would ALLOW), but NOT in the EU
+    // with PII data, so rule 2's fallback (REDACT) also applies. The more
+    // restrictive outcome must win.
+    const result = await mizara.authorize({
+      actor: { id: 'agent_1', type: 'autonomous_agent' },
+      action: { name: 'execute_payout' },
+      resource: { type: 'monetary_transaction', id: 'tx_1', attributes: { amount: 25, currency: 'USD' } },
+      context: { target_jurisdiction: 'US', data_classification: ['PII'] },
+    });
+
+    expect(result.status).toBe('REDACT');
+    expect(result.evaluation_metadata.triggered_rule_id).toBe('rule_regional_data_isolation');
+  });
+
+  it('lets a DENY from one rule override an ALLOW from another, regardless of array order', async () => {
+    const mizara = createMizaraClient({ policy: multiRulePolicy });
+
+    // Over the $50 limit -> rule 1 DENYs. Also EU + PII -> rule 2 ALLOWs
+    // (condition true). DENY must still win even though rule 2's outcome
+    // is less restrictive.
+    const result = await mizara.authorize({
+      actor: { id: 'agent_1', type: 'autonomous_agent' },
+      action: { name: 'execute_payout' },
+      resource: { type: 'monetary_transaction', id: 'tx_2', attributes: { amount: 75, currency: 'USD' } },
+      context: { target_jurisdiction: 'EU', data_classification: ['PII'] },
+    });
+
+    expect(result.status).toBe('DENY');
+    expect(result.evaluation_metadata.triggered_rule_id).toBe('rule_max_payout_limit');
+  });
+
+  it('is deterministic when two matching rules tie on severity: earlier rule wins', async () => {
+    const tiePolicy: Policy = {
+      policy_id: 'pol_tie_v1',
+      client_id: 'test_client',
+      rules: [
+        {
+          id: 'rule_a_deny',
+          target_action: 'any',
+          condition: 'resource.attributes.amount > 1000000',
+          effect: 'ALLOW',
+          fallback_effect: 'DENY',
+        },
+        {
+          id: 'rule_b_deny',
+          target_action: 'any',
+          condition: 'resource.attributes.amount > 1000000',
+          effect: 'ALLOW',
+          fallback_effect: 'DENY',
+        },
+      ],
+    };
+    const mizara = createMizaraClient({ policy: tiePolicy });
+
+    const result = await mizara.authorize({
+      actor: { id: 'agent_1', type: 'autonomous_agent' },
+      action: { name: 'anything' },
+      resource: { type: 'monetary_transaction', id: 'tx_3', attributes: { amount: 10 } },
+    });
+
+    expect(result.status).toBe('DENY');
+    expect(result.evaluation_metadata.triggered_rule_id).toBe('rule_a_deny');
+  });
+});

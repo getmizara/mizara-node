@@ -6,19 +6,29 @@ export interface RuleMatch {
   status: AuthorizationStatus;
 }
 
-// Resolves to the first rule (in array order) whose target_action matches
-// ("any" or an exact action.name match). Only one rule is evaluated per
-// action name; its condition decides between `effect` and `fallback_effect`.
+const SEVERITY: Record<AuthorizationStatus, number> = {
+  DENY: 3,
+  RE_ROUTE: 2,
+  REDACT: 1,
+  ALLOW: 0,
+};
+
+// Evaluates every rule matching the action ("any" or an exact name match)
+// and returns the most restrictive outcome. Ties keep the earlier rule.
 export function resolveRule(input: AuthorizeInput, policy: Policy): RuleMatch | null {
+  let best: RuleMatch | null = null;
+
   for (const rule of policy.rules) {
     const matchesAction = rule.target_action === 'any' || rule.target_action === input.action.name;
     if (!matchesAction) continue;
 
     const conditionMet = evaluateCondition(rule.condition, input);
-    return {
-      rule,
-      status: conditionMet ? rule.effect : rule.fallback_effect,
-    };
+    const status = conditionMet ? rule.effect : rule.fallback_effect;
+
+    if (!best || SEVERITY[status] > SEVERITY[best.status]) {
+      best = { rule, status };
+    }
   }
-  return null;
+
+  return best;
 }
