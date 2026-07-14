@@ -24,8 +24,22 @@ export interface MizaraClientOptions {
   receiptLogPath?: string;
 }
 
+export type ApprovalOutcome = 'APPROVED' | 'DENIED' | 'TIMEOUT';
+
+export interface WaitForApprovalOptions {
+  // How often to poll the hosted API, in ms. Default 3000.
+  pollIntervalMs?: number;
+  // How long to poll before giving up and returning 'TIMEOUT', in ms.
+  // Default 25 minutes, just under the server's 30-minute approval window.
+  timeoutMs?: number;
+}
+
 export interface MizaraClient {
   authorize(input: AuthorizeInput): Promise<AuthorizeResult>;
+  // Blocks until a RE_ROUTE decision's receipt is approved or denied, or
+  // the timeout elapses. Only present in hosted mode; local-mode clients
+  // have no server to poll.
+  waitForApproval?(receiptId: string, options?: WaitForApprovalOptions): Promise<ApprovalOutcome>;
   // Stops any background sync/flush timers. Safe to call on any client;
   // a no-op in local mode. Call before process exit so nothing keeps a
   // short-lived process (a script, a test run) alive.

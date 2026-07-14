@@ -30,6 +30,7 @@ function startMockServer() {
   const receivedReceipts: unknown[] = [];
   const seenReceiptIds = new Set<string>();
   let sessionTotal = 0;
+  const approvalStatus = new Map<string, string>();
 
   const server = createServer((req, res) => {
     if (failing) {
@@ -85,6 +86,19 @@ function startMockServer() {
       return;
     }
 
+    if (req.method === 'GET' && req.url?.startsWith('/api/v1/approvals/')) {
+      const receiptId = decodeURIComponent(req.url.slice('/api/v1/approvals/'.length));
+      const status = approvalStatus.get(receiptId);
+      if (!status) {
+        res.writeHead(404);
+        res.end();
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status }));
+      return;
+    }
+
     res.writeHead(404);
     res.end();
   });
@@ -96,6 +110,9 @@ function startMockServer() {
     },
     bumpPolicyVersion: () => {
       policyVersion += 1;
+    },
+    setApprovalStatus: (receiptId: string, status: string) => {
+      approvalStatus.set(receiptId, status);
     },
     receivedReceipts,
   };
@@ -271,5 +288,24 @@ describe('resilient hosted client', () => {
 
     expect(result.status).toBe('DENY');
     expect(result.enforcement.user_facing_error).toMatch(/session store unreachable/);
+  });
+
+  it('waitForApproval resolves once the hosted API reports a decision', async () => {
+    client = createMizaraClient({ apiKey: 'k', clientId: 'test_client', baseUrl, syncIntervalMs: 50 });
+    mock.setApprovalStatus('rcpt_pending', 'PENDING');
+
+    const pending = client.waitForApproval!('rcpt_pending', { pollIntervalMs: 20, timeoutMs: 2000 });
+    await sleep(50);
+    mock.setApprovalStatus('rcpt_pending', 'APPROVED');
+
+    await expect(pending).resolves.toBe('APPROVED');
+  });
+
+  it('waitForApproval returns TIMEOUT if no decision arrives in time', async () => {
+    client = createMizaraClient({ apiKey: 'k', clientId: 'test_client', baseUrl, syncIntervalMs: 50 });
+    mock.setApprovalStatus('rcpt_stuck', 'PENDING');
+
+    const outcome = await client.waitForApproval!('rcpt_stuck', { pollIntervalMs: 20, timeoutMs: 60 });
+    expect(outcome).toBe('TIMEOUT');
   });
 });

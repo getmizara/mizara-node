@@ -69,6 +69,21 @@ const mizara = createMizaraClient({
 
 Call `mizara.close()` before your process exits to stop the background sync and flush timers (a no-op in local mode, safe to always call).
 
+### Waiting on a RE_ROUTE decision
+
+A `RE_ROUTE` result means the action is held pending human approval. In hosted mode, `waitForApproval` polls until it's approved, denied, or the timeout elapses:
+
+```ts
+const result = await mizara.authorize({ /* ... */ });
+
+if (result.status === 'RE_ROUTE') {
+  const outcome = await mizara.waitForApproval!(result.cryptographic_receipt.id);
+  // outcome: 'APPROVED' | 'DENIED' | 'TIMEOUT'
+}
+```
+
+Only present in hosted mode; local mode has no server to hold pending approval state. Defaults to polling every 3s for up to 25 minutes.
+
 ## Policy format
 
 Plain JSON. No Rego, no Cedar syntax.

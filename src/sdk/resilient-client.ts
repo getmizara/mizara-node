@@ -2,7 +2,14 @@ import { resolveRule } from '../engine/decision-engine';
 import { createReceipt } from '../receipts/receipt';
 import type { AuthorizeInput, AuthorizeResult, Policy } from '../types';
 import { ReceiptLog } from './receipt-log';
-import type { MizaraClient } from './index';
+import type { ApprovalOutcome, MizaraClient, WaitForApprovalOptions } from './index';
+
+const DEFAULT_APPROVAL_POLL_MS = 3_000;
+const DEFAULT_APPROVAL_TIMEOUT_MS = 25 * 60 * 1000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export interface ResilientClientOptions {
   apiKey: string;
@@ -110,7 +117,10 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
   // fail-closed DENY - those are often the ones worth auditing most
   // (e.g. "why did this get denied at 3am" -> "policy hadn't synced
   // yet"), so they can't be the one case that's silently unrecorded.
-  function queueAndFlush(policyBundleVersion: string, result: AuthorizeResult): void {
+  // The input is included alongside the result, matching what the
+  // synchronous hosted endpoint stores, since a receipt with no record
+  // of what was being decided can't support a human approval review.
+  function queueAndFlush(policyBundleVersion: string, input: AuthorizeInput, result: AuthorizeResult): void {
     const receiptPayload = {
       id: result.cryptographic_receipt.id,
       policy_id: policyBundleVersion,
@@ -118,7 +128,7 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
       triggered_rule_id: result.evaluation_metadata.triggered_rule_id,
       hash: result.cryptographic_receipt.hash,
       signature: result.cryptographic_receipt.signature,
-      payload: { result },
+      payload: { input, result },
     };
 
     receiptLog?.appendPending({ receiptId: result.cryptographic_receipt.id, payload: receiptPayload });
@@ -133,7 +143,7 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
       enforcement: { action_halted: true, user_facing_error: message },
       cryptographic_receipt: receipt,
     };
-    queueAndFlush(policyBundleVersion, result);
+    queueAndFlush(policyBundleVersion, input, result);
     return result;
   }
 
@@ -192,9 +202,36 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
         if (typeof amount === 'number') incrementSessionTotal(sessionId, amount);
       }
 
-      queueAndFlush(policy.policy_id, result);
+      queueAndFlush(policy.policy_id, evaluatedInput, result);
 
       return result;
+    },
+
+    // Polls the hosted API for a RE_ROUTE decision's approval outcome.
+    // Meaningful only in hosted mode: local mode has no server to hold
+    // pending state, so a RE_ROUTE there is just a decision, not an
+    // approval workflow with someone on the other end of it.
+    async waitForApproval(receiptId: string, waitOptions?: WaitForApprovalOptions): Promise<ApprovalOutcome> {
+      const pollIntervalMs = waitOptions?.pollIntervalMs ?? DEFAULT_APPROVAL_POLL_MS;
+      const timeoutMs = waitOptions?.timeoutMs ?? DEFAULT_APPROVAL_TIMEOUT_MS;
+      const deadline = Date.now() + timeoutMs;
+
+      while (Date.now() < deadline) {
+        try {
+          const res = await fetch(`${options.baseUrl}/api/v1/approvals/${encodeURIComponent(receiptId)}`, {
+            headers: { Authorization: `Bearer ${options.apiKey}` },
+          });
+          if (res.ok) {
+            const body = (await res.json()) as { status: string };
+            if (body.status === 'APPROVED' || body.status === 'DENIED') return body.status;
+          }
+        } catch {
+          // Transient network failure: keep polling until the deadline.
+        }
+        await sleep(pollIntervalMs);
+      }
+
+      return 'TIMEOUT';
     },
 
     close(): void {
