@@ -84,6 +84,19 @@ if (result.status === 'RE_ROUTE') {
 
 Only present in hosted mode; local mode has no server to hold pending approval state. Defaults to polling every 3s for up to 25 minutes.
 
+### Verifying receipts
+
+Every receipt is signed with Ed25519, an asymmetric algorithm. Verification only needs the public key, not a call back to Mizara or the signing secret:
+
+```ts
+import { verifyReceipt, getPublicKey } from '@mizara/sdk';
+
+const publicKey = getPublicKey(); // or fetch from GET /api/v1/public-key in hosted mode
+const isValid = verifyReceipt(result.cryptographic_receipt, publicKey);
+```
+
+Set `MIZARA_SIGNING_PRIVATE_KEY` (a base64-encoded 32-byte Ed25519 seed) so the same key persists across restarts. Without it, a fresh key is generated per process and receipts stop being verifiable once it exits.
+
 ## Policy format
 
 Plain JSON. No Rego, no Cedar syntax.

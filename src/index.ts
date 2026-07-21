@@ -1,5 +1,6 @@
 export { createMizaraClient } from './sdk';
 export type { MizaraClient, MizaraClientOptions } from './sdk';
+export { verifyReceipt, getPublicKey } from './receipts/receipt';
 export type {
   Action,
   Actor,

@@ -52,7 +52,7 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
       if (!res.ok) throw new Error(`policy sync failed with status ${res.status}`);
 
       const body = (await res.json()) as { policy_id: string; client_id: string; rules: Policy['rules']; version: number };
-      policy = { policy_id: body.policy_id, client_id: body.client_id, rules: body.rules };
+      policy = { policy_id: body.policy_id, client_id: body.client_id, rules: body.rules, version: body.version };
       policyVersion = String(body.version);
       consecutiveSyncFailures = 0;
     } catch (err) {
@@ -139,7 +139,12 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
     const receipt = createReceipt({ input, status: 'DENY', triggeredRuleId: null });
     const result: AuthorizeResult = {
       status: 'DENY',
-      evaluation_metadata: { triggered_rule_id: null, policy_bundle_version: policyBundleVersion, execution_time_ms: 0 },
+      evaluation_metadata: {
+        triggered_rule_id: null,
+        policy_bundle_version: policyBundleVersion,
+        policy_version: policy?.version ?? null,
+        execution_time_ms: 0,
+      },
       enforcement: { action_halted: true, user_facing_error: message },
       cryptographic_receipt: receipt,
     };
@@ -188,6 +193,7 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
         evaluation_metadata: {
           triggered_rule_id: match?.rule.id ?? null,
           policy_bundle_version: policy.policy_id,
+          policy_version: policy.version ?? null,
           execution_time_ms: Number(executionTimeMs.toFixed(3)),
         },
         enforcement: {

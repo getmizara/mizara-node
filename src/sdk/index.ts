@@ -79,6 +79,7 @@ function createLocalClient(policy: Policy): MizaraClient {
         evaluation_metadata: {
           triggered_rule_id: match?.rule.id ?? null,
           policy_bundle_version: policy.policy_id,
+          policy_version: policy.version ?? null,
           execution_time_ms: Number(executionTimeMs.toFixed(3)),
         },
         enforcement: {

@@ -45,18 +45,30 @@ export interface Policy {
   policy_id: string;
   client_id: string;
   rules: PolicyRule[];
+  // Numeric version of this rule set. Undefined for policies loaded from
+  // a bare local JSON file with no version history behind them.
+  version?: number;
 }
 
 export interface CryptographicReceipt {
   id: string;
   hash: string;
   signature: string;
+  // Present on Ed25519-signed receipts; absent on legacy HMAC ones, which
+  // remain valid historical records but aren't independently verifiable
+  // without the shared secret that produced them.
+  algorithm?: string;
+  public_key?: string;
 }
 
 export interface EvaluationMetadata {
   triggered_rule_id: string | null;
   policy_bundle_version: string;
   execution_time_ms: number;
+  // The exact rule-set version active at decision time, so a receipt can
+  // be checked against the policy as it existed then, not as it exists
+  // now. Null when the policy has no version (e.g. local bare JSON file).
+  policy_version: number | null;
 }
 
 export interface Enforcement {

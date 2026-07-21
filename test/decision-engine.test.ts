@@ -76,7 +76,7 @@ describe('decision engine', () => {
 
     expect(result1.cryptographic_receipt.id).not.toBe(result2.cryptographic_receipt.id);
     expect(result1.cryptographic_receipt.hash).toBeTruthy();
-    expect(result1.cryptographic_receipt.signature).toMatch(/^sig_local_/);
+    expect(result1.cryptographic_receipt.signature).toBeTruthy();
   });
 });
 

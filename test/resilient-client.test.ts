@@ -177,6 +177,7 @@ describe('resilient hosted client', () => {
 
     expect(result.status).toBe('ALLOW');
     expect(result.evaluation_metadata.policy_bundle_version).toBe('pol_test_v1');
+    expect(result.evaluation_metadata.policy_version).toBe(1);
   });
 
   it('keeps using the last-known-good policy through a simulated outage instead of failing every call', async () => {
