@@ -77,10 +77,8 @@ export function getPublicKey(): string {
   return getKeyPair().publicKeyBase64;
 }
 
-// Independent, offline verification: checks a receipt's signature against
-// a public key without any call back to Mizara. This is what makes a
-// receipt actually verifiable rather than just "Mizara says it's valid" -
-// a customer or auditor can check it with only the public key.
+// Verifies a receipt's signature against a public key, entirely offline -
+// no call back to Mizara required.
 export function verifyReceipt(receipt: CryptographicReceipt, publicKeyBase64: string): boolean {
   if (receipt.algorithm !== 'ed25519' || !receipt.public_key) return false;
   const publicKeyDer = Buffer.concat([SPKI_ED25519_PREFIX, Buffer.from(publicKeyBase64, 'base64')]);

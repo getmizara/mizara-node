@@ -7,12 +7,9 @@ export interface QueuedReceipt {
 
 type LogEntry = { type: 'pending'; receiptId: string; payload: Record<string, unknown> } | { type: 'ack'; receiptId: string };
 
-// Write-ahead log for receipts awaiting delivery to the hosted API. A
-// receipt is appended as "pending" before a flush is attempted and
-// appended again as "ack" once the server confirms it. If the process
-// crashes between those two writes, loadUnacked() on the next startup
-// returns it so it can be retried - a receipt is never silently lost to
-// a crash between the decision and the network flush.
+// Write-ahead log for receipts awaiting delivery to the hosted API:
+// appended as "pending" before a flush attempt, "ack" once confirmed.
+// loadUnacked() replays anything still pending after a crash.
 export class ReceiptLog {
   constructor(private readonly path: string) {}
 

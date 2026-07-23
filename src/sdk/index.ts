@@ -3,6 +3,7 @@ import { resolveRule } from '../engine/decision-engine';
 import { createReceipt } from '../receipts/receipt';
 import type { AuthorizeInput, AuthorizeResult, Policy } from '../types';
 import { createResilientHostedClient } from './resilient-client';
+import { runShadowComparison, type ShadowComparisonResult } from '../engine/cedar-shadow-eval';
 
 const HOSTED_URL = 'https://mizara-services.vercel.app';
 
@@ -22,6 +23,10 @@ export interface MizaraClientOptions {
   // queue, so a process crash between a decision and its async flush to
   // the hosted API doesn't lose the receipt. Omit to run in-memory only.
   receiptLogPath?: string;
+  // Local mode only, opt-in: after each decision, also evaluates the
+  // policy through Cedar and reports whether it agreed. Never used to
+  // make the actual decision. Omit for zero added cost.
+  onCedarShadowComparison?: (result: ShadowComparisonResult, input: AuthorizeInput) => void | Promise<void>;
 }
 
 export type ApprovalOutcome = 'APPROVED' | 'DENIED' | 'TIMEOUT';
@@ -62,10 +67,13 @@ export function createMizaraClient(options: MizaraClientOptions): MizaraClient {
   }
 
   const policy = options.policy ?? loadPolicyFromFile(options.policyPath);
-  return createLocalClient(policy);
+  return createLocalClient(policy, options.onCedarShadowComparison);
 }
 
-function createLocalClient(policy: Policy): MizaraClient {
+function createLocalClient(
+  policy: Policy,
+  onCedarShadowComparison?: (result: ShadowComparisonResult, input: AuthorizeInput) => void | Promise<void>,
+): MizaraClient {
   return {
     async authorize(input: AuthorizeInput): Promise<AuthorizeResult> {
       const startedAt = performance.now();
@@ -73,6 +81,16 @@ function createLocalClient(policy: Policy): MizaraClient {
       const status = match?.status ?? 'DENY';
       const executionTimeMs = performance.now() - startedAt;
       const receipt = createReceipt({ input, status, triggeredRuleId: match?.rule.id ?? null });
+
+      if (onCedarShadowComparison) {
+        try {
+          const shadowResult = runShadowComparison(policy, input, status);
+          Promise.resolve(onCedarShadowComparison(shadowResult, input)).catch(() => {});
+        } catch {
+          // Shadow comparison is instrumentation, not the decision path -
+          // a bug in it must never affect the real authorize() result.
+        }
+      }
 
       return {
         status,

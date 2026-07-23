@@ -23,13 +23,11 @@ export interface ResilientClientOptions {
 const DEFAULT_SYNC_INTERVAL_MS = 10_000;
 const SYNC_FAILURE_WARNING_THRESHOLD = 3;
 
-// Hosted mode, resilient by default: policy is fetched once and then
-// refreshed in the background on an interval, so evaluation happens
-// locally, in-process, the same as local mode. A Mizara outage degrades
-// to "keep using the last policy successfully fetched," not "every
-// authorize() call fails." Receipts are generated locally and flushed
-// to the hosted API asynchronously, backed by a disk write-ahead log so
-// a process crash between the decision and the flush doesn't lose one.
+// Policy is fetched once and refreshed on an interval, so evaluation
+// happens locally between syncs - an outage means using the last
+// successfully-fetched policy, not failing every call. Receipts are
+// generated locally and flushed asynchronously, backed by a disk
+// write-ahead log so a crash doesn't lose one.
 export function createResilientHostedClient(options: ResilientClientOptions): MizaraClient {
   const syncIntervalMs = options.syncIntervalMs ?? DEFAULT_SYNC_INTERVAL_MS;
   const receiptLog = options.receiptLogPath ? new ReceiptLog(options.receiptLogPath) : null;
@@ -113,13 +111,9 @@ export function createResilientHostedClient(options: ResilientClientOptions): Mi
   if (typeof syncTimer.unref === 'function') syncTimer.unref();
   if (retryTimer && typeof retryTimer.unref === 'function') retryTimer.unref();
 
-  // Every decision gets queued and flushed the same way, including a
-  // fail-closed DENY - those are often the ones worth auditing most
-  // (e.g. "why did this get denied at 3am" -> "policy hadn't synced
-  // yet"), so they can't be the one case that's silently unrecorded.
-  // The input is included alongside the result, matching what the
-  // synchronous hosted endpoint stores, since a receipt with no record
-  // of what was being decided can't support a human approval review.
+  // Every decision is queued and flushed the same way, including a
+  // fail-closed DENY, with the input included alongside the result to
+  // match what the synchronous hosted endpoint stores.
   function queueAndFlush(policyBundleVersion: string, input: AuthorizeInput, result: AuthorizeResult): void {
     const receiptPayload = {
       id: result.cryptographic_receipt.id,
