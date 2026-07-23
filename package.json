@@ -1,6 +1,6 @@
 {
   "name": "@mizara/sdk",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Mizara - programmable authorization layer for AI actions",
   "license": "Apache-2.0",
   "keywords": [
@@ -17,6 +17,17 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine/decision-engine.d.ts",
+      "default": "./dist/engine/decision-engine.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "mizara": "dist/cli/index.js",
     "mizara-mcp": "dist/mcp/index.js"

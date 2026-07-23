@@ -1,6 +1,8 @@
 export { createMizaraClient } from './sdk';
 export type { MizaraClient, MizaraClientOptions } from './sdk';
 export { verifyReceipt, getPublicKey } from './receipts/receipt';
+export { resolveRule } from './engine/decision-engine';
+export type { RuleMatch } from './engine/decision-engine';
 export { compileConditionToCedar } from './engine/cedar-compiler';
 export { compilePolicyToCedar, runShadowComparison } from './engine/cedar-shadow-eval';
 export type { CedarCompilation, ShadowComparisonResult } from './engine/cedar-shadow-eval';
