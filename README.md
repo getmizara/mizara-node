@@ -1,7 +1,14 @@
-# Mizara SDK for Node.js
+<p align="center">
+  <img src="assets/logo-banner.svg" width="340" alt="mizara">
+</p>
 
-[![npm](https://img.shields.io/npm/v/%40mizara%2Fsdk?color=cb3837)](https://www.npmjs.com/package/@mizara/sdk)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE.md)
+<h1 align="center">Mizara SDK for Node.js</h1>
+
+<p align="center">
+  <a href="https://github.com/getmizara/mizara-node/actions/workflows/ci.yml"><img src="https://github.com/getmizara/mizara-node/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/@mizara/sdk"><img src="https://img.shields.io/npm/v/%40mizara%2Fsdk?color=cb3837" alt="npm"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License"></a>
+</p>
 
 Authorization layer for AI agents. Call `authorize()` before any consequential action. Sub-2ms evaluation, policy-as-data, cryptographic receipt on every decision.
 
