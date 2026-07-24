@@ -2,8 +2,6 @@
   <img src="assets/logo-banner.svg" width="340" alt="mizara">
 </p>
 
-<h1 align="center">Mizara SDK for Node.js</h1>
-
 <p align="center">
   <a href="https://github.com/getmizara/mizara-node/actions/workflows/ci.yml"><img src="https://github.com/getmizara/mizara-node/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://www.npmjs.com/package/@mizara/sdk"><img src="https://img.shields.io/npm/v/%40mizara%2Fsdk?color=cb3837" alt="npm"></a>
