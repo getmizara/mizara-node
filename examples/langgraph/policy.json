@@ -1,0 +1,22 @@
+{
+  "policy_id": "pol_platform_agent_v1",
+  "client_id": "demo_customer",
+  "rules": [
+    {
+      "id": "rule_block_prod_delete",
+      "target_action": "delete_cloud_resource",
+      "condition": "resource.attributes.environment == 'production'",
+      "effect": "DENY",
+      "fallback_effect": "ALLOW",
+      "remediation_message": "Deleting a resource in production requires human approval. Escalate before proceeding."
+    },
+    {
+      "id": "rule_pii_transmission",
+      "target_action": "transmit_data",
+      "condition": "context.data_classification.contains('PII') && resource.attributes.authorized_endpoint == false",
+      "effect": "REDACT",
+      "fallback_effect": "ALLOW",
+      "remediation_message": "Sensitive customer data must be masked before transmission to this endpoint."
+    }
+  ]
+}

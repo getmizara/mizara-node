@@ -1,0 +1,17 @@
+{
+  "_comment": [
+    "Claude Desktop MCP configuration for Mizara.",
+    "1. Install globally: npm install -g @mizara/sdk",
+    "2. Add this mcpServers block to your Claude Desktop config:",
+    "   macOS: ~/Library/Application Support/Claude/claude_desktop_config.json",
+    "   Windows: %APPDATA%/Claude/claude_desktop_config.json",
+    "3. Replace policy_path with the absolute path to your policy.json",
+    "4. Restart Claude Desktop"
+  ],
+  "mcpServers": {
+    "mizara": {
+      "command": "mizara-mcp",
+      "args": ["--policy", "/absolute/path/to/your/policy.json"]
+    }
+  }
+}

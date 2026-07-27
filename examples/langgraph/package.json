@@ -1,0 +1,19 @@
+{
+  "name": "mizara-langgraph-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shows how to add mizara.authorize() as a node in a LangGraph agent before tool execution",
+  "scripts": {
+    "demo": "tsx demo.ts"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.1",
+    "@langchain/langgraph": "^1.4.7",
+    "@mizara/sdk": "^0.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
