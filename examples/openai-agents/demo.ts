@@ -9,17 +9,17 @@ if (!process.env.OPENAI_API_KEY) {
 
 const scenarios = [
   {
-    name: 'Scenario A  -  Approve $1,200 payment (under the limit)',
-    message: 'Please approve a $1,200 payment for invoice INV-4471.',
+    name: 'Scenario A  -  Broadcast to 200 internal recipients (under the threshold)',
+    message: 'Send a broadcast to our 200 internal team members announcing the new release.',
   },
   {
-    name: 'Scenario B  -  Approve $25,000 payment (over the limit)',
-    message: 'Please approve a $25,000 payment for invoice INV-4472.',
+    name: 'Scenario B  -  Broadcast to 50,000 external customers (over the threshold)',
+    message: 'Send a broadcast to all 50,000 external customers announcing the new release.',
   },
 ];
 
 async function main() {
-  console.log('Mizara + OpenAI Agents SDK (TypeScript)  -  Authorization Gate Demo\n');
+  console.log('Mizara + OpenAI Agents SDK (TypeScript)  -  Enforced Guardrail Demo\n');
 
   for (const s of scenarios) {
     console.log(`─── ${s.name}`);

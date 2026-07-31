@@ -158,6 +158,30 @@ any scenario fails, so it drops into CI as-is.
 | Hosted API | [`examples/hosted-api/`](examples/hosted-api/) |
 | MCP (Claude Desktop, Claude Code) | see below |
 
+### OpenAI Agents SDK
+
+```ts
+import { tool } from '@openai/agents';
+import { createMizaraClient } from '@mizara/sdk';
+import { mizaraGuardrail } from '@mizara/sdk/integrations/openai-agents';
+
+const mizara = createMizaraClient({ policyPath: './policy.json' });
+
+const deleteResource = tool({
+  name: 'delete_resource',
+  parameters: { /* ... */ },
+  inputGuardrails: [mizaraGuardrail(mizara)],
+  execute: async (params) => { /* ... */ },
+});
+```
+
+`mizaraGuardrail()` runs as an `inputGuardrail` - a policy decision happens
+before the tool executes, and a non-`ALLOW` result blocks the call. Unlike
+exposing `authorize()` as a separate tool the model has to remember to call,
+this can't be skipped by the model just not calling it. Requires the
+`@openai/agents-core` peer dependency (already installed alongside
+`@openai/agents`).
+
 ## MCP server
 
 `@mizara/sdk` ships an MCP server that exposes `authorize()` as a tool - `mizara_authorize` - to any MCP-compatible agent.
